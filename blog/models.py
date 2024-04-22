@@ -1,20 +1,12 @@
 from django.db import models
-from django.db.models import CASCADE, PROTECT
-from auths.models import User
-from commons.models import AbstractCommonModel
+from django.db.models import CASCADE
 from django.utils.translation import gettext_lazy as _
 
-# Create your models here.
+from auths.models import Blogger
+from commons.models import AbstractCommonModel
 
-class Blogger(User):
 
-    first_name = models.CharField(verbose_name=_('First Name'), unique=True, max_length=120, null=False, blank=False)
-    last_name = models.CharField(verbose_name=_('First Name'), unique=True, max_length=120, null=False, blank=False)
-    profile_image_url = models.URLField(_('Profile Image Url'), max_length=1000)
-
-    class Meta:
-        verbose_name = _('Blogger')
-        verbose_name_plural = _('Bloggers')
+# Create your models here
 
 class Post(AbstractCommonModel):
 
@@ -36,13 +28,13 @@ class Comment(AbstractCommonModel):
     author = models.ForeignKey(verbose_name=_("Author"), to=Blogger, on_delete=CASCADE)
     post = models.ForeignKey(verbose_name=_("Post"), to=Post, on_delete=CASCADE)
     body = models.TextField(verbose_name=_('Body'))
-    is_deleted = models.BooleanField(verbose_name=('Deleted'), default=False)
+    is_deleted = models.BooleanField(verbose_name=_('Deleted'), default=False)
 
     def __str__(self) -> str:
         return f"{self.author.username}'s comment on {self.post.blogger.username}'s post - {self.post.title}"
 
 class Like(AbstractCommonModel):
-    post = models.ForeignKey(verbose_name=("Post"), to=Post, on_delete=CASCADE)
+    post = models.ForeignKey(verbose_name=_("Post"), to=Post, on_delete=CASCADE)
     amount = models.IntegerField(_("Number Of Likes"))
 
 class Tag(AbstractCommonModel):

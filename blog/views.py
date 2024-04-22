@@ -1,31 +1,12 @@
 from django.shortcuts import render
 from rest_framework.generics import GenericAPIView
-from rest_framework.mixins import CreateModelMixin, UpdateModelMixin, ListModelMixin, RetrieveModelMixin
+from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 
-from blog.querysets import ALL_BLOGGERS_QUERYSET, ALL_POSTS_QUERYSET, PUBLISHED_POSTS_QUERYSET
-from blog.serializers import BloggerSerializer, PostSerializer, BloggerPostsListSerializer
-from blog.filters import BloggerFilter, PostFilter
+from blog.querysets import ALL_POSTS_QUERYSET
+from blog.serializers import PostSerializer, BloggerPostsListSerializer
+from blog.filters import PostFilter
 # Create your views here.
 
-class BloggerAPIView(GenericAPIView):
-    queryset = ALL_BLOGGERS_QUERYSET
-    serializer_class = BloggerSerializer
-    filter_class = BloggerFilter
-
-    search_fields = ["username", "email", "id", "uuid", "created_at"]
-    ordering_fields = ["username", "created_at"]
-    ordering = ["-created_at"]
-
-class BloggerCreateUpdateView(CreateModelMixin, UpdateModelMixin, BloggerAPIView):
-
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
-    
-    def put(self, request, *args, **kwargs):
-        return self.update(request, *args, **kwargs)
-    
-    def patch(self, request, *args, **kwargs):
-        return self.partial_update(request, *args, **kwargs)
     
 class PostAPIView(GenericAPIView):
     queryset = ALL_POSTS_QUERYSET

@@ -1,12 +1,7 @@
 from django.contrib import admin
-
-from auths.admin import UserAdmin
-from blog.models import Blogger, Post, Comment, Like, Media
+from blog.models import Post, Comment, Like, Media
 
 # Register your models here.
-@admin.register(Blogger)
-class BloggerAdmin(UserAdmin):
-    pass
 
 class LikeInline(admin.TabularInline):
     model = Like

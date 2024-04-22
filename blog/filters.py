@@ -2,7 +2,7 @@ from django_filters import (
     FilterSet, NumberFilter, CharFilter,
     DateTimeFilter, DateTimeFromToRangeFilter
 )
-from blog.models import Post, Blogger
+from blog.models import Post
 
 class PostFilter(FilterSet):
 
@@ -13,13 +13,4 @@ class PostFilter(FilterSet):
 
     class Meta:
         model = Post
-        fields = ["owner"]
-
-class BloggerFilter(FilterSet):
-
-    email = CharFilter(field_name="email")
-    username = CharFilter(field_name="username")
-
-    class Meta:
-        model = Blogger
-        fields = ["email", "username"]
+        fields = ["blogger", "date", "date_from_to", "comment"]

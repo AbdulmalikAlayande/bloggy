@@ -3,7 +3,7 @@ from django.db import models
 
 from django.utils.translation import gettext_lazy as _
 from commons.models import AbstractCommonModel
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, AbstractUser
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 # Create your models here.
 
@@ -26,7 +26,12 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractCommonModel, AbstractBaseUser):
-
+    first_name = models.CharField(
+        verbose_name=_('First Name'), unique=True, max_length=120, null=False, blank=False
+    )
+    last_name = models.CharField(
+        verbose_name=_('Last Name'), unique=True, max_length=120, null=False, blank=False
+    )
     email = models.CharField(
         _("Email"), unique=True, max_length=120, db_index=True, null=False, blank=False
     )
@@ -38,7 +43,7 @@ class User(AbstractCommonModel, AbstractBaseUser):
     is_admin = models.BooleanField(
         _("Admin"), default=False, help_text="Designates Whether A User Is An Admin"
     )
-    USERNAME_FIELD = "username"
+    USERNAME_FIELD = "email"
     objects = UserManager()
 
     @property
@@ -59,5 +64,20 @@ class User(AbstractCommonModel, AbstractBaseUser):
         return []
 
     class Meta(AbstractCommonModel.Meta):
+        abstract = True
         verbose_name = _("User")
         verbose_name_plural = _("Users")
+
+class SuperUser(User):
+    profile_image_url = models.URLField(_('Profile Image Url'), max_length=1000, null=True)
+    class Meta:
+        verbose_name = _('Admin')
+        verbose_name_plural = _('Admins')
+
+class Blogger(User):
+
+    profile_image_url = models.URLField(_('Profile Image Url'), max_length=1000, null=True)
+
+    class Meta:
+        verbose_name = _('Blogger')
+        verbose_name_plural = _('Bloggers')

@@ -47,5 +47,4 @@ class BloggerSerializer(ModelSerializer):
 class BloggerPostsListSerializer(Serializer):
     blogger_username = CharField(max_length=255, required=True)
     posts = PostSerializer(many=True, required=False)
-    
-        
+
