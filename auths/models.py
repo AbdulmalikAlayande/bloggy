@@ -27,15 +27,18 @@ class UserManager(BaseUserManager):
 
 class User(AbstractCommonModel, AbstractBaseUser):
     first_name = models.CharField(
-        verbose_name=_('First Name'), unique=True, max_length=120, null=False, blank=False
+        verbose_name=_("First Name"), max_length=120, null=False, blank=False
     )
     last_name = models.CharField(
-        verbose_name=_('Last Name'), unique=True, max_length=120, null=False, blank=False
+        verbose_name=_("Last Name"), max_length=120, null=False, blank=False
     )
     email = models.CharField(
         _("Email"), unique=True, max_length=120, db_index=True, null=False, blank=False
     )
     password = models.CharField(_("Password"), max_length=128, null=False, blank=False)
+    profile_image_url = models.URLField(
+        _("Profile Image Url"), max_length=1000, null=True
+    )
     username = models.CharField(_("Username"), unique=True, max_length=120)
     is_active = models.BooleanField(
         _("Active"), default=True, help_text="Designates Whether A User Is Active"
@@ -60,24 +63,28 @@ class User(AbstractCommonModel, AbstractBaseUser):
     def has_module_perms(self, app_label):
         return self.is_active and self.is_admin
 
-    def get_all_permissions(self,  obj=None):
+    def get_all_permissions(self, obj=None):
         return []
-
+    
+    def __str__(self) -> str:
+        return f"{self.first_name} {self.last_name}"
+    
     class Meta(AbstractCommonModel.Meta):
         abstract = True
         verbose_name = _("User")
         verbose_name_plural = _("Users")
 
+
 class SuperUser(User):
-    profile_image_url = models.URLField(_('Profile Image Url'), max_length=1000, null=True)
     class Meta:
-        verbose_name = _('Admin')
-        verbose_name_plural = _('Admins')
+        verbose_name = _("Admin")
+        verbose_name_plural = _("Admins")
+
 
 class Blogger(User):
 
-    profile_image_url = models.URLField(_('Profile Image Url'), max_length=1000, null=True)
+    bio = models.TextField(max_length=500, blank=True)
 
     class Meta:
-        verbose_name = _('Blogger')
-        verbose_name_plural = _('Bloggers')
+        verbose_name = _("Blogger")
+        verbose_name_plural = _("Bloggers")

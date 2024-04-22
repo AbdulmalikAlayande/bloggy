@@ -17,9 +17,9 @@ class UserAdmin(BaseUserAdmin):
     filter_horizontal = []
 
 
-# @admin.register(SuperUser)
-# class Admin(UserAdmin):
-#     pass
+@admin.register(SuperUser)
+class Admin(UserAdmin):
+    pass
 
 
 @admin.register(Blogger)

@@ -20,9 +20,15 @@ class Post(AbstractCommonModel):
     blogger = models.ForeignKey(verbose_name=_('Blogger'), to=Blogger, on_delete=CASCADE)
     status = models.CharField(verbose_name=_("Status"), choices=Status.choices, default=Status.DRAFT)
 
+    def __str__(self) -> str:
+        return f"{self.title} - {self.blogger.first_name} {self.blogger.last_name}"
 class Media(AbstractCommonModel):
     cloud_url = models.URLField()
     post = models.OneToOneField(verbose_name=_('Post'), to=Post, on_delete=CASCADE)
+
+    def __str__(self) -> str:
+        return f"{self.post.title} - {self.post.blogger.first_name} {self.post.blogger.last_name}"
+
 
 class Comment(AbstractCommonModel):
     author = models.ForeignKey(verbose_name=_("Author"), to=Blogger, on_delete=CASCADE)
@@ -36,6 +42,9 @@ class Comment(AbstractCommonModel):
 class Like(AbstractCommonModel):
     post = models.ForeignKey(verbose_name=_("Post"), to=Post, on_delete=CASCADE)
     amount = models.IntegerField(_("Number Of Likes"))
+
+    def __str__(self) -> str:
+        return f"{self.post.title} - {self.amount}"
 
 class Tag(AbstractCommonModel):
     pass
