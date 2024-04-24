@@ -19,8 +19,19 @@ class BloggerAPIView(GenericAPIView):
 class BloggerCreateUpdateView(CreateModelMixin, UpdateModelMixin, BloggerAPIView):
 
     def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
-    
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        """
+        TODO
+        -Send An Email After Creating The User, That They Sucessfully Registered
+        -Probably Use Django anymail or use brevo api
+        -Make it a reusable component, so you can use it anywhere else
+        -Make it customizable
+        """
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     def put(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
     

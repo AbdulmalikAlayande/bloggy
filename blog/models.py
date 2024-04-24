@@ -24,7 +24,7 @@ class Post(AbstractCommonModel):
         return f"{self.title} - {self.blogger.first_name} {self.blogger.last_name}"
 class Media(AbstractCommonModel):
     cloud_url = models.URLField()
-    post = models.OneToOneField(verbose_name=_('Post'), to=Post, on_delete=CASCADE)
+    post = models.ForeignKey(verbose_name=_('Post'), to=Post, on_delete=CASCADE, related_name="medias")
 
     def __str__(self) -> str:
         return f"{self.post.title} - {self.post.blogger.first_name} {self.post.blogger.last_name}"

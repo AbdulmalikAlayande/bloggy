@@ -11,3 +11,4 @@ django-admin-interface==0.28.6
 django-admin-autocomplete-filter==0.7.1
 django-debug-toolbar==4.3.0
 django-filter==24.2
+djangorestframework-simplejwt==5.3.1

@@ -1,4 +1,7 @@
-from rest_framework.serializers import ModelSerializer, Serializer, CharField
+from rest_framework.serializers import (
+    ModelSerializer, EmailField, Serializer, 
+    CharField, RelatedField
+)
 
 from blog.models import Post, Blogger, Comment, Like, Media
 
@@ -23,11 +26,24 @@ class LikeSerializer(ModelSerializer):
         fields = "__all__"
         read_only_fields = ["id", "uuid", "created_at"]
 
-class PostSerializer(ModelSerializer):
+class UrlListingField(RelatedField):
+
+    def to_representation(self, value):
+        print('value is => ', value)
+        return value
     
-    medias = MediaSerializer(many=True, required=False)
-    comments = CommentSerializer(many=True, required=False)
-    likes = LikeSerializer(many=True, required=False) 
+    def to_internal_value(self, data):
+        print('data is ==> '+ data)
+        return data
+
+class PostCreateSerializer(Serializer):
+    blogger_email = EmailField(required=True)
+    title = CharField(required=True)
+    body = CharField(required=True)
+    mediaUrls = UrlListingField(many=True, queryset=Media.objects.all())
+
+
+class PostSerializer(ModelSerializer):
 
     class Meta:
         model = Post

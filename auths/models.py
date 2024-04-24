@@ -82,9 +82,12 @@ class SuperUser(User):
 
 
 class Blogger(User):
-
     bio = models.TextField(max_length=500, blank=True)
 
     class Meta:
         verbose_name = _("Blogger")
         verbose_name_plural = _("Bloggers")
+
+class Follower(AbstractCommonModel):
+    blogger = models.ForeignKey(to=Blogger, on_delete=models.CASCADE, related_name="followers", related_query_name="blogger_follower")
+    follower = models.ForeignKey(to=Blogger, on_delete=models.CASCADE)
