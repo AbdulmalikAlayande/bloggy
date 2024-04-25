@@ -52,8 +52,8 @@ class PostListRetrieveView(ListModelMixin, RetrieveModelMixin, PostAPIView):
 
 
 class PostCreateView(CreateModelMixin, PostAPIView):
-
     serializer_class = PostCreateSerializer
+
     def post(self, request, *args, **kwargs):
         try:
             serializer = self.get_serializer(data=request.data)
