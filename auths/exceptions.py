@@ -23,4 +23,4 @@ class ServiceUnavailableException(APIException):
 class Conflict(APIException):
     status_code = status.HTTP_409_CONFLICT
     default_detail = {"Error": "A conflict occurred"}
-    default_code = 'An Error Occured, Probably Invalid Request Dat'
+    default_code = 'conflict'

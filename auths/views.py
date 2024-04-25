@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework.mixins import CreateModelMixin, UpdateModelMixin
 from rest_framework.generics import GenericAPIView
 from auths.serializers import CreateBloggerSerializer
@@ -24,7 +23,7 @@ class BloggerCreateUpdateView(CreateModelMixin, UpdateModelMixin, BloggerAPIView
         self.perform_create(serializer)
         """
         TODO
-        -Send An Email After Creating The User, That They Sucessfully Registered
+        -Send An Email After Creating The User, That They Successfully Registered
         -Probably Use Django anymail or use brevo api
         -Make it a reusable component, so you can use it anywhere else
         -Make it customizable
