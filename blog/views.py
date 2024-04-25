@@ -6,7 +6,11 @@ from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveMode
 from auths.models import Blogger
 from blog.models import Media, Post
 from blog.querysets import ALL_POSTS_QUERYSET
-from blog.serializers import PostSerializer, BloggerPostsListSerializer, PostCreateSerializer
+from blog.serializers import (
+    PostSerializer,
+    BloggerPostsListSerializer,
+    PostCreateSerializer,
+)
 from blog.filters import PostFilter
 from commons.utils import get_object_or_404
 
@@ -66,9 +70,9 @@ class PostCreateView(CreateModelMixin, PostAPIView):
             self.perform_create(data=data)
             headers = self.get_success_headers(serializer.data)
             response_data = {
-                "message": "Post created successfully", 
+                "message": "Post created successfully",
                 **serializer.validated_data,
-                "blogger": blogger.username
+                "blogger": blogger.username,
             }
             return Response(
                 data=response_data, status=status.HTTP_201_CREATED, headers=headers
@@ -79,7 +83,9 @@ class PostCreateView(CreateModelMixin, PostAPIView):
             )
 
     def perform_create(self, data):
-        post = Post(title=data.get('title'), body=data.get('body'), blogger=data.get('blogger'))
+        post = Post(
+            title=data.get("title"), body=data.get("body"), blogger=data.get("blogger")
+        )
         post.status = Post.Status.PUBLISHED
         post.save()
         media_urls = data.get("mediaUrls")
