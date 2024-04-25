@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     "debug_toolbar.apps.DebugToolbarConfig",
     "django.contrib.staticfiles",
     "commons.apps.CommonsConfig",
-    "auths.apps.AuthsConfig",
+    "anymail.apps.AnymailBaseConfig" "auths.apps.AuthsConfig",
     "blog.apps.BlogConfig",
     "django_filters",
 ]
@@ -137,3 +137,10 @@ REST_FRAMEWORK = {
     ],
 }
 AUTH_USER_MODEL = "auths.SuperUser"
+EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
+SERVER_EMAIL = ENV.str("SERVER_EMAIL")
+DEFAULT_FROM_EMAIL = ENV.str("DEFAULT_FROM_EMAIL")
+ANY_MAIL = {
+    "BREVO_API_KEY": ENV.str("BREVO_API_KEY"),
+    "IGNORE_UNSUPPORTED_FEATURES": True,
+}
