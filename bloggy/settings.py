@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import dj_database_url
+import os
 
 from bloggy.environment import ENV
 
@@ -44,7 +45,8 @@ INSTALLED_APPS = [
     "debug_toolbar.apps.DebugToolbarConfig",
     "django.contrib.staticfiles",
     "commons.apps.CommonsConfig",
-    "anymail.apps.AnymailBaseConfig" "auths.apps.AuthsConfig",
+    "anymail.apps.AnymailBaseConfig",
+    "auths.apps.AuthsConfig",
     "blog.apps.BlogConfig",
     "django_filters",
 ]
@@ -65,7 +67,7 @@ ROOT_URLCONF = "bloggy.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [os.path.join(BASE_DIR, "templates")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -136,11 +138,11 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ],
 }
-AUTH_USER_MODEL = "auths.SuperUser"
+AUTH_USER_MODEL = "auths.User"
 EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
 SERVER_EMAIL = ENV.str("SERVER_EMAIL")
 DEFAULT_FROM_EMAIL = ENV.str("DEFAULT_FROM_EMAIL")
-ANY_MAIL = {
+ANYMAIL = {
     "BREVO_API_KEY": ENV.str("BREVO_API_KEY"),
     "IGNORE_UNSUPPORTED_FEATURES": True,
 }

@@ -23,7 +23,7 @@ class TokenCreateView(jwt_views.TokenViewBase):
             serializer.is_valid(raise_exception=True)
             email = serializer.validated_data.get(EMAIL)
             password = serializer.validated_data.get(PASSWORD)
-            user: User = authenticate(
+            user: User | None = authenticate(
                 request=request, username=email, password=password
             )
             if not user:

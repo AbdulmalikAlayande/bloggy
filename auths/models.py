@@ -70,7 +70,6 @@ class User(AbstractCommonModel, AbstractBaseUser):
         return f"{self.first_name} {self.last_name}"
     
     class Meta(AbstractCommonModel.Meta):
-        abstract = True
         verbose_name = _("User")
         verbose_name_plural = _("Users")
 

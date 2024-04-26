@@ -9,30 +9,52 @@ class CreateBloggerSerializer(ModelSerializer):
 
     class Meta:
         model = Blogger
-        fields = ["first_name", "last_name", "email", "password", "username", "profile_image_url"]
+        fields = [
+            "first_name",
+            "last_name",
+            "email",
+            "password",
+            "username",
+            "profile_image_url",
+        ]
         read_only_fields = ["id", "uuid", "created_at", "last_updated"]
         extra_kwargs = {
             "password": {
-                "write_only": True, "max_length": 128,
-                "required": True, "allow_blank": False,
-                "trim_whitespaces": True, "allow_null": False
+                "write_only": True,
+                "max_length": 128,
+                "required": True,
+                "allow_blank": False,
+                "trim_whitespace": True,
+                "allow_null": False,
+                "validators": [validate_password],
             },
             "first_name": {
-                "max_length": 20, "required": True, "allow_null": False,
-                "allow_blank": False, "trim_whitespaces": True
+                "max_length": 120,
+                "required": True,
+                "allow_null": False,
+                "allow_blank": False,
+                "trim_whitespace": True,
             },
             "last_name": {
-                "max_length": 20, "required": True, "allow_null": False,
-                "allow_blank": False, "trim_whitespaces": True,
-                "validators": [validate_password]
+                "max_length": 120,
+                "required": True,
+                "allow_null": False,
+                "allow_blank": False,
+                "trim_whitespace": True,
             },
             "email": {
-                "max_length": 20, "required": True, "allow_null": False,
-                "allow_blank": False, "trim_whitespaces": True,
-                "validators": [EmailValidator()]
+                "max_length": 120,
+                "required": True,
+                "allow_null": False,
+                "allow_blank": False,
+                "trim_whitespace": True,
+                "validators": [EmailValidator()],
             },
             "username": {
-                "max_length": 20, "required": True, "allow_null": False,
-                "allow_blank": False, "trim_whitespaces": True
+                "max_length": 120,
+                "required": True,
+                "allow_null": False,
+                "allow_blank": False,
+                "trim_whitespace": True,
             },
         }

@@ -4,5 +4,5 @@ from django.urls import include
 
 urlpatterns = [
     path('register-blogger/', BloggerCreateUpdateView.as_view()),
-    path('auth/token/', include('auths.token'))
+    path('token/', include('auths.token.urls'))
 ]
