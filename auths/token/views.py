@@ -59,7 +59,6 @@ class TokenRefreshView(jwt_views.TokenViewBase):
             refresh: RefreshToken = RefreshToken(
                 serializer.validated_data.get("refresh")
             )
-
             if jwt_settings.ROTATE_REFRESH_TOKENS:
                 refresh.set_jti()
                 refresh.set_exp()

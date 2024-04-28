@@ -4,6 +4,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 
 from auths.models import Blogger
+from auths.permissions import IsAuthenticatedUser, IsAdminUser
 from blog.models import Media, Post
 from blog.querysets import ALL_POSTS_QUERYSET
 from blog.serializers import (
@@ -19,6 +20,7 @@ class PostAPIView(GenericAPIView):
     queryset = ALL_POSTS_QUERYSET
     serializer_class = PostSerializer
     filter_class = PostFilter
+    permission_classes = [IsAuthenticatedUser]
     search_fields = [
         "title",
         "blogger__username",

@@ -10,23 +10,22 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
 class UserManager(BaseUserManager):
 
-    def _create_user(self, **kwargs: Any) -> Any:
+    def _create_user(self, **kwargs: Any) -> 'User':
         user = self.model(**kwargs)
         user.set_password(kwargs.get("password"))
         user.save(using=self._db)
         return user
 
-    def create_user(self, **kwargs: Any) -> Any:
+    def create_user(self, **kwargs: Any) -> 'User':
         kwargs["is_admin"] = False
         return self._create_user(**kwargs)
 
-    def create_superuser(self, **kwargs: Any) -> Any:
+    def create_superuser(self, **kwargs: Any) -> 'User':
         kwargs["is_admin"] = True
         return self._create_user(**kwargs)
 
 
 class User(AbstractCommonModel, AbstractBaseUser):
-    _password = None
     first_name = models.CharField(
         verbose_name=_("First Name"), max_length=120, null=False, blank=False
     )
@@ -75,7 +74,7 @@ class User(AbstractCommonModel, AbstractBaseUser):
         verbose_name_plural = _("Users")
 
 
-class SuperUser(User):
+class Superuser(User):
     class Meta:
         verbose_name = _("Admin")
         verbose_name_plural = _("Admins")

@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
 
-from auths.models import SuperUser, Blogger
+from auths.models import Superuser, Blogger
 
 
 # Register your models here.
@@ -17,7 +17,7 @@ class UserAdmin(BaseUserAdmin):
     filter_horizontal = []
 
 
-@admin.register(SuperUser)
+@admin.register(Superuser)
 class Admin(UserAdmin):
     pass
 
