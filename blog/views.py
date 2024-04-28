@@ -1,4 +1,6 @@
+from django.db.models import QuerySet
 from rest_framework import status
+from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
@@ -20,7 +22,7 @@ class PostAPIView(GenericAPIView):
     queryset = ALL_POSTS_QUERYSET
     serializer_class = PostSerializer
     filter_class = PostFilter
-    permission_classes = [IsAuthenticatedUser]
+    # permission_classes = [IsAuthenticatedUser]
     search_fields = [
         "title",
         "blogger__username",
@@ -34,18 +36,22 @@ class PostAPIView(GenericAPIView):
 
 
 class BloggerPostsListView(ListModelMixin, PostAPIView):
-    serializer_class = BloggerPostsListSerializer
 
-    def list(self, request, *args, **kwargs):
+    def get(self, request: Request, *args, **kwargs):
+        blogger: Blogger = get_object_or_404(Blogger, uuid=kwargs.get("bid"))
+        query_set: QuerySet[Post] = self.get_queryset().filter(blogger=blogger)
         return super().list(request, *args, **kwargs)
 
 
 class BloggerPostRetrieveView(RetrieveModelMixin, PostAPIView):
 
-    serializer_class = BloggerPostsListSerializer
-
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
+    def get(self, request, *args, **kwargs):
+        blogger: Blogger = get_object_or_404(Blogger, uuid=kwargs.get("bid"))
+        query_set: QuerySet[Post] = (
+            self.get_queryset().filter(blogger=blogger).filter(uuid=kwargs.get("pid"))
+        )
+        print(query_set)
+        return Response({"data": "no data for now"}, status=status.HTTP_200_OK)
 
 
 class PostListRetrieveView(ListModelMixin, RetrieveModelMixin, PostAPIView):
@@ -95,3 +101,9 @@ class PostCreateView(CreateModelMixin, PostAPIView):
             media = Media(cloud_url=url, post=post)
             media.save()
         return post
+
+
+"""
+
+}
+"""

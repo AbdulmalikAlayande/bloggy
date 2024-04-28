@@ -22,6 +22,7 @@ class TokenCreateView(jwt_views.TokenViewBase):
     serializer_class = TokenCreateSerializer
 
     def post(self, request: Request, *args, **kwargs) -> Response:
+
         try:
             serializer: TokenCreateSerializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)

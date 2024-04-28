@@ -29,11 +29,9 @@ class LikeSerializer(ModelSerializer):
 class UrlListingField(RelatedField):
 
     def to_representation(self, value):
-        print('value is => ', value)
         return value
     
     def to_internal_value(self, data):
-        print('data is ==> '+ data)
         return data
 
 class PostCreateSerializer(Serializer):
