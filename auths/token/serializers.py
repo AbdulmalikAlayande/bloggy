@@ -6,5 +6,10 @@ class TokenCreateSerializer(serializers.Serializer):
     password = serializers.CharField(required=True)
 
 
+class TokenSerializer(serializers.Serializer):
+    access = serializers.CharField(required=False)
+    refresh = serializers.CharField(required=False)
+
+
 class RefreshTokenSerializer(serializers.Serializer):
     refresh = serializers.CharField(required=True)

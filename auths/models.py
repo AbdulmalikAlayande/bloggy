@@ -26,6 +26,7 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractCommonModel, AbstractBaseUser):
+    _password = None
     first_name = models.CharField(
         verbose_name=_("First Name"), max_length=120, null=False, blank=False
     )
@@ -65,10 +66,10 @@ class User(AbstractCommonModel, AbstractBaseUser):
 
     def get_all_permissions(self, obj=None):
         return []
-    
+
     def __str__(self) -> str:
         return f"{self.first_name} {self.last_name}"
-    
+
     class Meta(AbstractCommonModel.Meta):
         verbose_name = _("User")
         verbose_name_plural = _("Users")
@@ -87,6 +88,12 @@ class Blogger(User):
         verbose_name = _("Blogger")
         verbose_name_plural = _("Bloggers")
 
+
 class Follower(AbstractCommonModel):
-    blogger = models.ForeignKey(to=Blogger, on_delete=models.CASCADE, related_name="followers", related_query_name="blogger_follower")
+    blogger = models.ForeignKey(
+        to=Blogger,
+        on_delete=models.CASCADE,
+        related_name="followers",
+        related_query_name="blogger_follower",
+    )
     follower = models.ForeignKey(to=Blogger, on_delete=models.CASCADE)

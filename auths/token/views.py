@@ -5,11 +5,15 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_simplejwt import views as jwt_views
 from rest_framework_simplejwt.settings import api_settings as jwt_settings
-from rest_framework_simplejwt.tokens import RefreshToken, Token, TokenError
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 
 from auths.models import User
 from auths.permissions import AllowAny
-from auths.token.serializers import TokenCreateSerializer, RefreshTokenSerializer
+from auths.token.serializers import (
+    TokenCreateSerializer,
+    RefreshTokenSerializer,
+    TokenSerializer,
+)
 from auths.utils import TOKEN_CREATE_AUTHENTICATION_FAILED_FOR_USER, EMAIL, PASSWORD
 
 
@@ -33,18 +37,15 @@ class TokenCreateView(jwt_views.TokenViewBase):
                     ),
                     code="authentication_failed",
                 )
-            refresh: Token = RefreshToken.for_user(user)
-            data = {"access": refresh.token, "refresh": refresh}
-            return Response(data=data, status=status.HTTP_200_OK)
-        except TokenError as exception:
-            return Response(data=str(exception), status=status.HTTP_400_BAD_REQUEST)
-        except AuthenticationFailed as exception:
-            return Response(data=str(exception), status=status.HTTP_400_BAD_REQUEST)
-        except ValidationError as exception:
+            refresh = RefreshToken.for_user(user)
+            data = {"access": str(refresh.access_token), "refresh": str(refresh)}
+            response_serializer = TokenSerializer(data=data)
+            response_serializer.is_valid(raise_exception=True)
             return Response(
-                data={"error": exception.args, "code": "validation_error"},
-                status=status.HTTP_400_BAD_REQUEST,
+                data=response_serializer.validated_data, status=status.HTTP_200_OK
             )
+        except (TokenError, AuthenticationFailed, ValidationError) as exception:
+            return Response(data=str(exception), status=status.HTTP_400_BAD_REQUEST)
 
 
 class TokenRefreshView(jwt_views.TokenViewBase):
@@ -59,20 +60,18 @@ class TokenRefreshView(jwt_views.TokenViewBase):
                 serializer.validated_data.get("refresh")
             )
 
-            if jwt_settings.RROTATE_REFRESH_TOKENS:
+            if jwt_settings.ROTATE_REFRESH_TOKENS:
                 refresh.set_jti()
                 refresh.set_exp()
             return Response(
-                {"access": refresh.access_token, "refresh": refresh},
+                {
+                    "access": refresh.access_token.__str__(),
+                    "refresh": refresh.__str__(),
+                },
                 status.HTTP_200_OK,
             )
-        except TokenError as exception:
+        except (TokenError, ValidationError) as exception:
             return Response(
-                data={"error": exception.args, "code": "token_error"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        except ValidationError as exception:
-            return Response(
-                data={"error": exception.args, "code": "validation_error"},
+                data={"error": exception.args},
                 status=status.HTTP_400_BAD_REQUEST,
             )
