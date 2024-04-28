@@ -63,12 +63,15 @@ class TokenRefreshView(jwt_views.TokenViewBase):
             if jwt_settings.ROTATE_REFRESH_TOKENS:
                 refresh.set_jti()
                 refresh.set_exp()
+            data = {
+                "access": refresh.access_token.__str__(),
+                "refresh": refresh.__str__(),
+            }
+            response_serializer = TokenSerializer(data=data)
+            response_serializer.is_valid(raise_exception=True)
             return Response(
-                {
-                    "access": refresh.access_token.__str__(),
-                    "refresh": refresh.__str__(),
-                },
-                status.HTTP_200_OK,
+                data=response_serializer.validated_data,
+                status=status.HTTP_200_OK,
             )
         except (TokenError, ValidationError) as exception:
             return Response(
