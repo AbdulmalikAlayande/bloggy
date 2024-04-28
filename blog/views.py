@@ -101,9 +101,3 @@ class PostCreateView(CreateModelMixin, PostAPIView):
             media = Media(cloud_url=url, post=post)
             media.save()
         return post
-
-
-"""
-
-}
-"""
