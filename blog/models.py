@@ -8,8 +8,8 @@ from commons.models import AbstractCommonModel
 
 # Create your models here
 
-class Post(AbstractCommonModel):
 
+class Post(AbstractCommonModel):
     class Status(models.TextChoices):
         DRAFT = "draft", _("Draft")
         PUBLISHED = "published", _("Published")
@@ -17,34 +17,52 @@ class Post(AbstractCommonModel):
 
     title = models.CharField(verbose_name=_("Title"), max_length=255)
     body = models.TextField(verbose_name=_("Body"))
-    blogger = models.ForeignKey(verbose_name=_('Blogger'), to=Blogger, on_delete=CASCADE)
-    status = models.CharField(verbose_name=_("Status"), choices=Status.choices, default=Status.DRAFT)
+    number_of_likes = models.IntegerField(verbose_name=_("Number Of Likes"))
+    blogger = models.ForeignKey(
+        verbose_name=_("Blogger"),
+        to=Blogger,
+        on_delete=CASCADE,
+        related_name="posts",
+    )
+    status = models.CharField(
+        verbose_name=_("Status"), choices=Status.choices, default=Status.DRAFT
+    )
 
     def __str__(self) -> str:
         return f"{self.title} - {self.blogger.first_name} {self.blogger.last_name}"
+
+
 class Media(AbstractCommonModel):
     cloud_url = models.URLField()
-    post = models.ForeignKey(verbose_name=_('Post'), to=Post, on_delete=CASCADE, related_name="medias")
+    post = models.ForeignKey(
+        verbose_name=_("Post"), to=Post, on_delete=CASCADE, related_name="medias"
+    )
 
     def __str__(self) -> str:
-        return f"{self.post.title} - {self.post.blogger.first_name} {self.post.blogger.last_name}"
+        return f"{self.post.title} - {self.cloud_url}"
 
 
 class Comment(AbstractCommonModel):
     author = models.ForeignKey(verbose_name=_("Author"), to=Blogger, on_delete=CASCADE)
-    post = models.ForeignKey(verbose_name=_("Post"), to=Post, on_delete=CASCADE)
-    body = models.TextField(verbose_name=_('Body'))
-    is_deleted = models.BooleanField(verbose_name=_('Deleted'), default=False)
+    post = models.ForeignKey(
+        verbose_name=_("Post"), to=Post, on_delete=CASCADE, related_name="comments"
+    )
+    body = models.TextField(verbose_name=_("Body"))
+    is_deleted = models.BooleanField(verbose_name=_("Deleted"), default=False)
 
     def __str__(self) -> str:
         return f"{self.author.username}'s comment on {self.post.blogger.username}'s post - {self.post.title}"
 
+
 class Like(AbstractCommonModel):
-    post = models.ForeignKey(verbose_name=_("Post"), to=Post, on_delete=CASCADE)
-    amount = models.IntegerField(_("Number Of Likes"))
+    post = models.ForeignKey(
+        verbose_name=_("Post"), to=Post, on_delete=CASCADE, related_name="likes"
+    )
+    creator = models.ForeignKey(verbose_name=_("Creator"), to=Blogger, on_delete=CASCADE)
 
     def __str__(self) -> str:
-        return f"{self.post.title} - {self.amount}"
+        return f"{self.post.title} - {self.post.number_of_likes}"
+
 
 class Tag(AbstractCommonModel):
     pass

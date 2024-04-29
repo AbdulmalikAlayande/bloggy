@@ -5,31 +5,53 @@ from rest_framework.serializers import (
     CharField,
     RelatedField,
 )
-
+from rest_framework import serializers
 from blog.models import Post, Blogger, Comment, Like, Media
 
 
 class MediaSerializer(ModelSerializer):
     class Meta:
         model = Media
-        fields = "__all__"
+        fields = ["cloud_url"]
         read_only_fields = ["id", "uuid", "created_at"]
 
 
 class CommentSerializer(ModelSerializer):
+    author_username = serializers.CharField(source="author.username", required=True)
 
     class Meta:
         model = Comment
-        field = "__all__"
+        field = ["author_username", "body", "created_at"]
         read_only_fields = ["id", "uuid", "created_at"]
 
 
 class LikeSerializer(ModelSerializer):
+    creator_username = CharField(source="creator.username")
 
     class Meta:
         model = Like
-        fields = "__all__"
+        fields = ["creator_username", "created_at"]
         read_only_fields = ["id", "uuid", "created_at"]
+
+
+class PostSerializer(ModelSerializer):
+    comments = CommentSerializer(many=True)
+    likes = LikeSerializer(many=True)
+    medias = MediaSerializer(many=True)
+    blogger_username = CharField(source="blogger.username")
+
+    class Meta:
+        model = Post
+        fields = ["blogger_username", "status", "number_of_likes", "title", "body", "likes", "comments", "medias"]
+        read_only_fields = ["id", "uuid", "created_at", "blogger", "last_updated"]
+
+
+class BloggerPostsListSerializer(ModelSerializer):
+    posts = PostSerializer(many=True)
+
+    class Meta:
+        model = Post
+        fields = ["posts"]
 
 
 class UrlListingField(RelatedField):
@@ -46,25 +68,3 @@ class PostCreateSerializer(Serializer):
     title = CharField(required=True)
     body = CharField(required=True)
     mediaUrls = UrlListingField(many=True, queryset=Media.objects.all())
-
-
-class PostSerializer(ModelSerializer):
-
-    class Meta:
-        model = Post
-        fields = "__all__"
-        read_only_fields = ["id", "uuid", "created_at", "blogger"]
-
-
-class BloggerSerializer(ModelSerializer):
-
-    class Meta:
-        model = Blogger
-        fields = "__all__"
-        read_only_fields = ["id", "uuid", "created_at"]
-        write_only_fields = ["password"]
-
-
-class BloggerPostsListSerializer(Serializer):
-    blogger_username = CharField(max_length=255, required=True)
-    posts = PostSerializer(many=True, required=False)

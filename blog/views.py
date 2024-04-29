@@ -39,19 +39,18 @@ class BloggerPostsListView(ListModelMixin, PostAPIView):
 
     def get(self, request: Request, *args, **kwargs):
         blogger: Blogger = get_object_or_404(Blogger, uuid=kwargs.get("bid"))
-        query_set: QuerySet[Post] = self.get_queryset().filter(blogger=blogger)
-        return super().list(request, *args, **kwargs)
+        posts = self.get_queryset().filter(blogger=blogger)
+        response_data = [self.get_serializer(post).data for post in posts]
+        return Response(data=response_data, status=status.HTTP_200_OK)
 
 
 class BloggerPostRetrieveView(RetrieveModelMixin, PostAPIView):
 
     def get(self, request, *args, **kwargs):
         blogger: Blogger = get_object_or_404(Blogger, uuid=kwargs.get("bid"))
-        query_set: QuerySet[Post] = (
-            self.get_queryset().filter(blogger=blogger).filter(uuid=kwargs.get("pid"))
-        )
-        print(query_set)
-        return Response({"data": "no data for now"}, status=status.HTTP_200_OK)
+        post: Post = (self.get_queryset().filter(blogger=blogger).get(uuid=kwargs.get("pid")))
+        serializer: PostSerializer = self.get_serializer(post)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
 class PostListRetrieveView(ListModelMixin, RetrieveModelMixin, PostAPIView):
@@ -101,3 +100,21 @@ class PostCreateView(CreateModelMixin, PostAPIView):
             media = Media(cloud_url=url, post=post)
             media.save()
         return post
+
+
+"""
+response_data = {
+            "message": "Post Was Found",
+            "post": {
+                "blogger_username": post.blogger.username,
+                "status": post.status,
+                "title": post.title,
+                "body": post.body,
+                "likes": len(list(post.likes.all())),
+                "comments": list(
+                    post.comments.all().values("author__username", "body")
+                ),
+                "medias": list(post.medias.all().values("created_at", "cloud_url")),
+            },
+        }
+"""
