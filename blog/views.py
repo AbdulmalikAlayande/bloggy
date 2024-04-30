@@ -16,6 +16,7 @@ from blog.filters import PostFilter
 from commons.utils import get_object_or_404
 
 
+# region Base Classes
 class PostAPIView(GenericAPIView):
     queryset = ALL_POSTS_QUERYSET
     serializer_class = PostSerializer
@@ -25,6 +26,9 @@ class PostAPIView(GenericAPIView):
     ordering_fields = ["title", "created_at"]
     ordering = ["-created_at"]
 
+
+# endregion
+# region Post - Public(Not User Endpoint)
 
 class PostCreateView(CreateModelMixin, PostAPIView):
     serializer_class = PostCreateSerializer
@@ -52,24 +56,6 @@ class PostCreateView(CreateModelMixin, PostAPIView):
         medias = [Media(cloud_url=url, post=post) for url in media_urls]
         Media.objects.bulk_create(medias)
         return post
-
-
-class BloggerPostsListView(ListModelMixin, PostAPIView):
-
-    def get(self, request: Request, *args, **kwargs):
-        blogger: Blogger = get_object_or_404(Blogger, uuid=kwargs.get("bid"))
-        posts = self.get_queryset().filter(blogger=blogger)
-        response_data = [self.get_serializer(post).data for post in posts]
-        return Response(data=response_data, status=status.HTTP_200_OK)
-
-
-class BloggerPostRetrieveView(RetrieveModelMixin, PostAPIView):
-
-    def get(self, request, *args, **kwargs):
-        blogger: Blogger = get_object_or_404(Blogger, uuid=kwargs.get("bid"))
-        post: Post = (self.get_queryset().filter(blogger=blogger).get(uuid=kwargs.get("pid")))
-        serializer: PostSerializer = self.get_serializer(post)
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
 class PostsListView(ListModelMixin, PostAPIView):
@@ -114,3 +100,24 @@ class AddLikeView(CreateModelMixin, PostAPIView):
         response_serializer = self.get_serializer(like)
         headers = self.get_success_headers(serializer.data)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+# endregion
+# region - Post - Private(User Specific Endpoints)
+
+class BloggerPostsListView(ListModelMixin, PostAPIView):
+
+    def get(self, request: Request, *args, **kwargs):
+        blogger: Blogger = get_object_or_404(Blogger, uuid=kwargs.get("bid"))
+        posts = self.get_queryset().filter(blogger=blogger)
+        response_data = [self.get_serializer(post).data for post in posts]
+        return Response(data=response_data, status=status.HTTP_200_OK)
+
+
+class BloggerPostRetrieveView(RetrieveModelMixin, PostAPIView):
+
+    def get(self, request, *args, **kwargs):
+        blogger: Blogger = get_object_or_404(Blogger, uuid=kwargs.get("bid"))
+        post: Post = (self.get_queryset().filter(blogger=blogger).get(uuid=kwargs.get("pid")))
+        serializer: PostSerializer = self.get_serializer(post)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)

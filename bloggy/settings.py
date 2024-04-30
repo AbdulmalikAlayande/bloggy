@@ -1,3 +1,4 @@
+from datetime import timedelta
 from pathlib import Path
 import dj_database_url
 import os
@@ -24,6 +25,7 @@ INSTALLED_APPS = [
     "auths.apps.AuthsConfig",
     "blog.apps.BlogConfig",
     "django_filters",
+    "rest_framework_simplejwt.token_blacklist"
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -141,3 +143,16 @@ ANYMAIL = {
 #         }
 #     }
 # }
+
+#  JWT
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=ENV.int("ACCESS_TOKEN_LIFETIME", default=4320)),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=ENV.int("REFRESH_TOKEN_LIFETIME")),
+    "ROTATE_REFRESH_TOKENS": ENV.bool("ROTATE_REFRESH_TOKENS"),
+    "BLACKLIST_AFTER_ROTATION": ENV.bool("BLACKLIST_AFTER_ROTATION"),
+    "UPDATE_LAST_LOGIN": ENV.bool("UPDATE_LAST_LOGIN"),
+    "SIGNING_KEY": ENV.str("SIGNING_KEY"),
+    "USER_ID_FIELD": "uuid",
+}
+AUTH_TOKEN_TIMEOUT = ENV.int("AUTH_TOKEN_TIMEOUT")
+AUTH_TOKEN_SECRET = ENV.str("AUTH_TOKEN_SECRET")
