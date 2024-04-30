@@ -1,8 +1,8 @@
 from django.http import Http404
 from django.shortcuts import _get_queryset
 
-def get_object_or_404(model, *args, **kwargs):
 
+def get_object_or_404(model, *args, **kwargs):
     queryset = _get_queryset(model)
     if not hasattr(queryset, 'get'):
         model_name = (

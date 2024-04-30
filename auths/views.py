@@ -2,6 +2,7 @@ from rest_framework.mixins import CreateModelMixin, UpdateModelMixin
 from rest_framework.generics import GenericAPIView
 
 from auths.models import Blogger, User, Superuser
+from auths.permissions import AllowAny, IsAdminUser, IsAuthenticatedUser
 from auths.serializers import CreateBloggerSerializer, CreateSuperuserSerializer
 from auths.filters import BloggerFilter
 from rest_framework import status
@@ -31,6 +32,7 @@ class BloggerAPIView(GenericAPIView):
     search_fields = ["username", "email", "id", "uuid", "created_at"]
     ordering_fields = ["username", "created_at"]
     ordering = ["-created_at"]
+    permission_classes = [AllowAny]
 
 
 class BloggerCreateUpdateView(CreateModelMixin, UpdateModelMixin, BloggerAPIView):
@@ -72,3 +74,6 @@ class SuperUserCreateUpdateView(GenericAPIView, CreateModelMixin, UpdateModelMix
 
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
+
+    def get_permissions(self):
+        return [IsAdminUser, IsAuthenticatedUser]

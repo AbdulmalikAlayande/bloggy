@@ -21,8 +21,13 @@ class CommentSerializer(ModelSerializer):
 
     class Meta:
         model = Comment
-        field = ["author_username", "body", "created_at"]
-        read_only_fields = ["id", "uuid", "created_at"]
+        fields = ["author_username", "body", "created_at"]
+        read_only_fields = ["id", "uuid", "created_at", "is_deleted"]
+        extra_kwargs = {
+            "created_at": {
+                "required": False
+            }
+        }
 
 
 class LikeSerializer(ModelSerializer):
@@ -67,4 +72,4 @@ class PostCreateSerializer(Serializer):
     blogger_email = EmailField(required=True)
     title = CharField(required=True)
     body = CharField(required=True)
-    mediaUrls = UrlListingField(many=True, queryset=Media.objects.all())
+    media_urls = UrlListingField(many=True, queryset=Media.objects.all(), required=True)

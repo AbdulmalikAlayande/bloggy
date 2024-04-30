@@ -17,7 +17,7 @@ class Post(AbstractCommonModel):
 
     title = models.CharField(verbose_name=_("Title"), max_length=255)
     body = models.TextField(verbose_name=_("Body"))
-    number_of_likes = models.IntegerField(verbose_name=_("Number Of Likes"))
+    number_of_likes = models.IntegerField(verbose_name=_("Number Of Likes"), default=0)
     blogger = models.ForeignKey(
         verbose_name=_("Blogger"),
         to=Blogger,

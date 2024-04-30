@@ -1,4 +1,3 @@
-from django.db.models import QuerySet
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -6,13 +5,12 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 
 from auths.models import Blogger
-from auths.permissions import IsAuthenticatedUser, IsAdminUser
-from blog.models import Media, Post
+from auths.permissions import IsAuthenticatedUser
+from blog.models import Media, Post, Comment, Like
 from blog.querysets import ALL_POSTS_QUERYSET
 from blog.serializers import (
     PostSerializer,
-    BloggerPostsListSerializer,
-    PostCreateSerializer,
+    PostCreateSerializer, CommentSerializer, LikeSerializer,
 )
 from blog.filters import PostFilter
 from commons.utils import get_object_or_404
@@ -22,17 +20,38 @@ class PostAPIView(GenericAPIView):
     queryset = ALL_POSTS_QUERYSET
     serializer_class = PostSerializer
     filter_class = PostFilter
-    # permission_classes = [IsAuthenticatedUser]
-    search_fields = [
-        "title",
-        "blogger__username",
-        "blogger__email",
-        "id",
-        "uuid",
-        "created_at",
-    ]
+    permission_classes = [IsAuthenticatedUser]
+    search_fields = ["title", "blogger__username", "blogger__email", "id", "uuid", "created_at"]
     ordering_fields = ["title", "created_at"]
     ordering = ["-created_at"]
+
+
+class PostCreateView(CreateModelMixin, PostAPIView):
+    serializer_class = PostCreateSerializer
+
+    def post(self, request, *args, **kwargs):
+        try:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            blogger: Blogger = get_object_or_404(Blogger, email=request.data.get("blogger_email"))
+            data: dict = serializer.validated_data
+            data["blogger"] = blogger
+            data["status"] = Post.Status.PUBLISHED
+            post: Post = self.perform_create(data=data)
+            headers = self.get_success_headers(serializer.data)
+            response_serializer = PostSerializer(post)
+            return Response(data={"message": "Post created successfully", **response_serializer.data},
+                            status=status.HTTP_201_CREATED, headers=headers)
+        except Exception as exception:
+            return Response(data={"error": str(exception)}, status=status.HTTP_400_BAD_REQUEST)
+
+    def perform_create(self, data: dict) -> Post:
+        unwanted_data_keys = ['blogger_email', 'media_urls']
+        post: Post = Post.objects.create(**{key: value for key, value in data.items() if key not in unwanted_data_keys})
+        media_urls = data.get("media_urls")
+        medias = [Media(cloud_url=url, post=post) for url in media_urls]
+        Media.objects.bulk_create(medias)
+        return post
 
 
 class BloggerPostsListView(ListModelMixin, PostAPIView):
@@ -53,68 +72,45 @@ class BloggerPostRetrieveView(RetrieveModelMixin, PostAPIView):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
-class PostListRetrieveView(ListModelMixin, RetrieveModelMixin, PostAPIView):
+class PostsListView(ListModelMixin, PostAPIView):
 
-    def list(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
+
+class PostRetrieveView(RetrieveModelMixin, PostAPIView):
+
+    def get(self, request, *args, **kwargs):
+        post: Post = self.get_queryset().filter(uuid=kwargs.get("bid")).get()
+        serializer: PostSerializer = self.get_serializer(post)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
-class PostCreateView(CreateModelMixin, PostAPIView):
-    serializer_class = PostCreateSerializer
+class AddCommentView(CreateModelMixin, PostAPIView):
+    serializer_class = CommentSerializer
 
     def post(self, request, *args, **kwargs):
-        try:
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            blogger: Blogger = get_object_or_404(
-                Blogger, email=request.data.get("blogger_email")
-            )
-            data = serializer.validated_data
-            data["blogger"] = blogger
-            self.perform_create(data=data)
-            headers = self.get_success_headers(serializer.data)
-            response_data = {
-                "message": "Post created successfully",
-                **serializer.validated_data,
-                "blogger": blogger.username,
-            }
-            return Response(
-                data=response_data, status=status.HTTP_201_CREATED, headers=headers
-            )
-        except Exception as exception:
-            return Response(
-                {"error": str(exception)}, status=status.HTTP_400_BAD_REQUEST
-            )
+        serializer: CommentSerializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        post: Post = ALL_POSTS_QUERYSET.get(uuid=kwargs.get("pid"))
+        author: Blogger = get_object_or_404(Blogger, username=serializer.validated_data.get("author").get("username"))
+        comment: Comment = Comment.objects.create(body=serializer.validated_data.get("body"), post=post, author=author)
+        response_serializer = self.get_serializer(comment)
+        headers = self.get_success_headers(serializer.data)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-    def perform_create(self, data):
-        post = Post(
-            title=data.get("title"), body=data.get("body"), blogger=data.get("blogger")
-        )
-        post.status = Post.Status.PUBLISHED
+
+class AddLikeView(CreateModelMixin, PostAPIView):
+    serializer_class = LikeSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer: LikeSerializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        post: Post = ALL_POSTS_QUERYSET.get(uuid=kwargs.get("pid"))
+        post.number_of_likes = post.number_of_likes + 1
         post.save()
-        media_urls = data.get("mediaUrls")
-        for url in media_urls:
-            media = Media(cloud_url=url, post=post)
-            media.save()
-        return post
-
-
-"""
-response_data = {
-            "message": "Post Was Found",
-            "post": {
-                "blogger_username": post.blogger.username,
-                "status": post.status,
-                "title": post.title,
-                "body": post.body,
-                "likes": len(list(post.likes.all())),
-                "comments": list(
-                    post.comments.all().values("author__username", "body")
-                ),
-                "medias": list(post.medias.all().values("created_at", "cloud_url")),
-            },
-        }
-"""
+        creator: Blogger = get_object_or_404(Blogger, username=serializer.validated_data.get("creator").get("username"))
+        like: Like = Like.objects.create(creator=creator, post=post)
+        response_serializer = self.get_serializer(like)
+        headers = self.get_success_headers(serializer.data)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
