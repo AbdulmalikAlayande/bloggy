@@ -20,16 +20,23 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "debug_toolbar.apps.DebugToolbarConfig",
     "django.contrib.staticfiles",
+    'allauth',
+    'allauth.account',
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.facebook",
+    "allauth.socialaccount.providers.twitter",
+    "allauth.socialaccount.providers.twitter_oauth2",
     "commons.apps.CommonsConfig",
     "anymail.apps.AnymailBaseConfig",
     "auths.apps.AuthsConfig",
     "blog.apps.BlogConfig",
     "django_filters",
-    "rest_framework_simplejwt.token_blacklist"
+    "rest_framework_simplejwt.token_blacklist",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -57,6 +64,12 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "bloggy.wsgi.application"
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+    ...
+]
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -118,6 +131,19 @@ DEFAULT_FROM_EMAIL = ENV.str("DEFAULT_FROM_EMAIL")
 ANYMAIL = {
     "BREVO_API_KEY": ENV.str("BREVO_API_KEY"),
     "IGNORE_UNSUPPORTED_FEATURES": True,
+}
+
+SOCIALACCOUNT_PROVIDERS = {
+    'facebook': {
+        'APP': {
+            'client_id': '',
+            'secret': '',
+            'key': ''
+        }
+    },
+    'twitter': {
+
+    }
 }
 
 # Logging #

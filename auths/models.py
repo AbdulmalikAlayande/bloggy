@@ -2,8 +2,10 @@ from typing import Any
 from django.db import models
 
 from django.utils.translation import gettext_lazy as _
+
 from commons.models import AbstractCommonModel
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+
 
 # Create your models here.
 
@@ -80,8 +82,16 @@ class Superuser(User):
         verbose_name_plural = _("Admins")
 
 
+class Preference(AbstractCommonModel):
+    name = models.CharField(verbose_name=_("Preference"), unique=True, null=True, blank=False)
+
+    def __str__(self):
+        return f"{self.name}"
+
+
 class Blogger(User):
     bio = models.TextField(max_length=500, blank=True)
+    preferences = models.ForeignKey(verbose_name=_("Preferences"), to=Preference, on_delete=models.PROTECT)
 
     class Meta:
         verbose_name = _("Blogger")

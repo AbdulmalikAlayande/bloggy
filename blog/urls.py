@@ -3,8 +3,8 @@ from blog.views import (
     BloggerPostsListView,
     BloggerPostRetrieveView,
     PostCreateView,
-    PostsListView,
-    PostRetrieveView,
+    PostsListView, BloggerPostDestroyView,
+    PostRetrieveView, BloggerPostUpdateView,
     AddCommentView,
     AddLikeView
 )
@@ -16,5 +16,7 @@ urlpatterns = [
     path("blogger/<uuid:bid>/posts/", BloggerPostsListView.as_view()),
     path("blogger/<uuid:bid>/post/<uuid:pid>/", BloggerPostRetrieveView.as_view()),
     path("post/<uuid:pid>/", PostRetrieveView.as_view()),
+    path("post/<uuid:pid>/delete-post", BloggerPostDestroyView.as_view(lookup_field="uuid")),
+    path("post/<uuid:pid>/update-post", BloggerPostUpdateView.as_view()),
     path("posts/all/", PostsListView.as_view()),
 ]

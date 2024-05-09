@@ -65,4 +65,16 @@ class Like(AbstractCommonModel):
 
 
 class Tag(AbstractCommonModel):
-    pass
+    name = models.CharField(verbose_name=_("Tag"), unique=True)
+    posts = models.ManyToManyField(verbose_name=_("Posts"), to=Post, related_name="tags", related_query_name="tag")
+
+    def __str__(self):
+        return f"{self.name}"
+
+
+class Category(AbstractCommonModel):
+    name = models.CharField(verbose_name=_("Category"), unique=True)
+    posts = models.ManyToManyField(verbose_name=_("Posts"), to=Post, related_name="category")
+
+    def __str__(self):
+        return f"{self.name}"

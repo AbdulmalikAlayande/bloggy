@@ -2,7 +2,8 @@ from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
-from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
+from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin, DestroyModelMixin, \
+    UpdateModelMixin
 
 from auths.models import Blogger
 from auths.permissions import IsAuthenticatedUser
@@ -105,6 +106,15 @@ class AddLikeView(CreateModelMixin, PostAPIView):
 # endregion
 # region - Post - Private(User Specific Endpoints)
 
+"""
+TODO: Endpoints To Add
+1. Delete Post
+2. Create Draft Post
+3. Update Post
+4. Get Blogger Specific Draft Post
+"""
+
+
 class BloggerPostsListView(ListModelMixin, PostAPIView):
 
     def get(self, request: Request, *args, **kwargs):
@@ -121,3 +131,22 @@ class BloggerPostRetrieveView(RetrieveModelMixin, PostAPIView):
         post: Post = (self.get_queryset().filter(blogger=blogger).get(uuid=kwargs.get("pid")))
         serializer: PostSerializer = self.get_serializer(post)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+
+class BloggerPostDestroyView(DestroyModelMixin, PostAPIView):
+
+    def delete(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
+
+    def get_object(self):
+        pid = self.kwargs.get('pid')
+        return get_object_or_404(Post, uuid=pid)
+
+
+class BloggerPostUpdateView(UpdateModelMixin, PostAPIView):
+
+    def put(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)

@@ -12,3 +12,9 @@ shell:
 
 admin:
 	python manage.py bloggycreatesuperuser
+
+push:
+	git push origin bola
+
+add:
+	git add .
