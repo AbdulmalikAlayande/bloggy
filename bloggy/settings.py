@@ -1,5 +1,6 @@
 from datetime import timedelta
 from pathlib import Path
+
 import dj_database_url
 import os
 
@@ -26,6 +27,8 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.facebook",
     "allauth.socialaccount.providers.twitter",
     "allauth.socialaccount.providers.twitter_oauth2",
+    "django_elasticsearch_dsl",
+    "django_elasticsearch_dsl_drf",
     "commons.apps.CommonsConfig",
     "anymail.apps.AnymailBaseConfig",
     "auths.apps.AuthsConfig",
@@ -44,7 +47,11 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-
+ELASTICSEARCH_DSL = {
+    "default": {
+        "hosts": "localhost:9200"
+    }
+}
 ROOT_URLCONF = "bloggy.urls"
 
 TEMPLATES = [

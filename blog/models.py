@@ -58,7 +58,9 @@ class Like(AbstractCommonModel):
     post = models.ForeignKey(
         verbose_name=_("Post"), to=Post, on_delete=CASCADE, related_name="likes"
     )
-    creator = models.ForeignKey(verbose_name=_("Creator"), to=Blogger, on_delete=CASCADE)
+    creator = models.ForeignKey(
+        verbose_name=_("Creator"), to=Blogger, on_delete=CASCADE
+    )
 
     def __str__(self) -> str:
         return f"{self.post.title} - {self.post.number_of_likes}"
@@ -66,7 +68,9 @@ class Like(AbstractCommonModel):
 
 class Tag(AbstractCommonModel):
     name = models.CharField(verbose_name=_("Tag"), unique=True)
-    posts = models.ManyToManyField(verbose_name=_("Posts"), to=Post, related_name="tags", related_query_name="tag")
+    posts = models.ManyToManyField(
+        verbose_name=_("Posts"), to=Post, related_name="tags", related_query_name="tag"
+    )
 
     def __str__(self):
         return f"{self.name}"
@@ -74,7 +78,13 @@ class Tag(AbstractCommonModel):
 
 class Category(AbstractCommonModel):
     name = models.CharField(verbose_name=_("Category"), unique=True)
-    posts = models.ManyToManyField(verbose_name=_("Posts"), to=Post, related_name="category")
+    posts = models.ManyToManyField(
+        verbose_name=_("Posts"), to=Post, related_name="category"
+    )
 
     def __str__(self):
         return f"{self.name}"
+
+
+class ElasticDemo:
+    pass

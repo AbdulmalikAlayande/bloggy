@@ -14,7 +14,7 @@ admin:
 	python manage.py bloggycreatesuperuser
 
 push:
-	git push origin bola
+	git push
 
 add:
 	git add .
