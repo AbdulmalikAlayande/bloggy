@@ -1,3 +1,4 @@
+from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
 from rest_framework.serializers import (
     ModelSerializer,
     EmailField,
@@ -6,6 +7,8 @@ from rest_framework.serializers import (
     RelatedField,
 )
 from rest_framework import serializers
+
+from blog.document import PostsDocument
 from blog.models import Post, Blogger, Comment, Like, Media
 
 
@@ -23,11 +26,7 @@ class CommentSerializer(ModelSerializer):
         model = Comment
         fields = ["author_username", "body", "created_at"]
         read_only_fields = ["id", "uuid", "created_at", "is_deleted"]
-        extra_kwargs = {
-            "created_at": {
-                "required": False
-            }
-        }
+        extra_kwargs = {"created_at": {"required": False}}
 
 
 class LikeSerializer(ModelSerializer):
@@ -47,7 +46,16 @@ class PostSerializer(ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ["blogger_username", "status", "number_of_likes", "title", "body", "likes", "comments", "medias"]
+        fields = [
+            "blogger_username",
+            "status",
+            "number_of_likes",
+            "title",
+            "body",
+            "likes",
+            "comments",
+            "medias",
+        ]
         read_only_fields = ["id", "uuid", "created_at", "blogger", "last_updated"]
 
 
@@ -73,3 +81,16 @@ class PostCreateSerializer(Serializer):
     title = CharField(required=True)
     body = CharField(required=True)
     media_urls = UrlListingField(many=True, queryset=Media.objects.all(), required=True)
+
+
+class PostDocumentSerializer(DocumentSerializer):
+    class Meta:
+        model = Post
+        document = PostsDocument
+        fields = ["title", "body"]
+
+    def get_location(self, obj):
+        try:
+            return obj.location.to_dict()
+        except AttributeError:
+            return {}

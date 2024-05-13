@@ -1,17 +1,33 @@
+from django_elasticsearch_dsl_drf.filter_backends import (
+    SearchFilterBackend,
+    FilteringFilterBackend,
+    OrderingFilterBackend,
+    CompoundSearchFilterBackend,
+)
+from django_elasticsearch_dsl_drf.viewsets import DocumentViewSet
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
-from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin, DestroyModelMixin, \
-    UpdateModelMixin
+from rest_framework.mixins import (
+    CreateModelMixin,
+    ListModelMixin,
+    RetrieveModelMixin,
+    DestroyModelMixin,
+    UpdateModelMixin,
+)
 
 from auths.models import Blogger
 from auths.permissions import IsAuthenticatedUser
+from blog.document import PostsDocument
 from blog.models import Media, Post, Comment, Like
 from blog.querysets import ALL_POSTS_QUERYSET
 from blog.serializers import (
     PostSerializer,
-    PostCreateSerializer, CommentSerializer, LikeSerializer,
+    PostCreateSerializer,
+    CommentSerializer,
+    LikeSerializer,
+    PostDocumentSerializer,
 )
 from blog.filters import PostFilter
 from commons.utils import get_object_or_404
@@ -23,13 +39,21 @@ class PostAPIView(GenericAPIView):
     serializer_class = PostSerializer
     filter_class = PostFilter
     permission_classes = [IsAuthenticatedUser]
-    search_fields = ["title", "blogger__username", "blogger__email", "id", "uuid", "created_at"]
+    search_fields = [
+        "title",
+        "blogger__username",
+        "blogger__email",
+        "id",
+        "uuid",
+        "created_at",
+    ]
     ordering_fields = ["title", "created_at"]
     ordering = ["-created_at"]
 
 
 # endregion
 # region Post - Public(Not User Endpoint)
+
 
 class PostCreateView(CreateModelMixin, PostAPIView):
     serializer_class = PostCreateSerializer
@@ -38,21 +62,37 @@ class PostCreateView(CreateModelMixin, PostAPIView):
         try:
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            blogger: Blogger = get_object_or_404(Blogger, email=request.data.get("blogger_email"))
+            blogger: Blogger = get_object_or_404(
+                Blogger, email=request.data.get("blogger_email")
+            )
             data: dict = serializer.validated_data
             data["blogger"] = blogger
             data["status"] = Post.Status.PUBLISHED
             post: Post = self.perform_create(data=data)
             headers = self.get_success_headers(serializer.data)
             response_serializer = PostSerializer(post)
-            return Response(data={"message": "Post created successfully", **response_serializer.data},
-                            status=status.HTTP_201_CREATED, headers=headers)
+            return Response(
+                data={
+                    "message": "Post created successfully",
+                    **response_serializer.data,
+                },
+                status=status.HTTP_201_CREATED,
+                headers=headers,
+            )
         except Exception as exception:
-            return Response(data={"error": str(exception)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                data={"error": str(exception)}, status=status.HTTP_400_BAD_REQUEST
+            )
 
     def perform_create(self, data: dict) -> Post:
-        unwanted_data_keys = ['blogger_email', 'media_urls']
-        post: Post = Post.objects.create(**{key: value for key, value in data.items() if key not in unwanted_data_keys})
+        unwanted_data_keys = ["blogger_email", "media_urls"]
+        post: Post = Post.objects.create(
+            **{
+                key: value
+                for key, value in data.items()
+                if key not in unwanted_data_keys
+            }
+        )
         media_urls = data.get("media_urls")
         medias = [Media(cloud_url=url, post=post) for url in media_urls]
         Media.objects.bulk_create(medias)
@@ -80,11 +120,17 @@ class AddCommentView(CreateModelMixin, PostAPIView):
         serializer: CommentSerializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         post: Post = ALL_POSTS_QUERYSET.get(uuid=kwargs.get("pid"))
-        author: Blogger = get_object_or_404(Blogger, username=serializer.validated_data.get("author").get("username"))
-        comment: Comment = Comment.objects.create(body=serializer.validated_data.get("body"), post=post, author=author)
+        author: Blogger = get_object_or_404(
+            Blogger, username=serializer.validated_data.get("author").get("username")
+        )
+        comment: Comment = Comment.objects.create(
+            body=serializer.validated_data.get("body"), post=post, author=author
+        )
         response_serializer = self.get_serializer(comment)
         headers = self.get_success_headers(serializer.data)
-        return Response(response_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(
+            response_serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
 
 
 class AddLikeView(CreateModelMixin, PostAPIView):
@@ -96,11 +142,15 @@ class AddLikeView(CreateModelMixin, PostAPIView):
         post: Post = ALL_POSTS_QUERYSET.get(uuid=kwargs.get("pid"))
         post.number_of_likes = post.number_of_likes + 1
         post.save()
-        creator: Blogger = get_object_or_404(Blogger, username=serializer.validated_data.get("creator").get("username"))
+        creator: Blogger = get_object_or_404(
+            Blogger, username=serializer.validated_data.get("creator").get("username")
+        )
         like: Like = Like.objects.create(creator=creator, post=post)
         response_serializer = self.get_serializer(like)
         headers = self.get_success_headers(serializer.data)
-        return Response(response_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(
+            response_serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
 
 
 # endregion
@@ -128,7 +178,9 @@ class BloggerPostRetrieveView(RetrieveModelMixin, PostAPIView):
 
     def get(self, request, *args, **kwargs):
         blogger: Blogger = get_object_or_404(Blogger, uuid=kwargs.get("bid"))
-        post: Post = (self.get_queryset().filter(blogger=blogger).get(uuid=kwargs.get("pid")))
+        post: Post = (
+            self.get_queryset().filter(blogger=blogger).get(uuid=kwargs.get("pid"))
+        )
         serializer: PostSerializer = self.get_serializer(post)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
@@ -139,7 +191,7 @@ class BloggerPostDestroyView(DestroyModelMixin, PostAPIView):
         return super().destroy(request, *args, **kwargs)
 
     def get_object(self):
-        pid = self.kwargs.get('pid')
+        pid = self.kwargs.get("pid")
         return get_object_or_404(Post, uuid=pid)
 
 
@@ -150,3 +202,14 @@ class BloggerPostUpdateView(UpdateModelMixin, PostAPIView):
 
     def patch(self, request, *args, **kwargs):
         return super().partial_update(request, *args, **kwargs)
+
+
+class PostDocumentView(DocumentViewSet):
+    document = PostsDocument
+    serializer_class = PostDocumentSerializer
+    filter_backends = [
+        SearchFilterBackend,
+        FilteringFilterBackend,
+        OrderingFilterBackend,
+        CompoundSearchFilterBackend,
+    ]

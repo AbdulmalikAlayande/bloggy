@@ -84,7 +84,3 @@ class Category(AbstractCommonModel):
 
     def __str__(self):
         return f"{self.name}"
-
-
-class ElasticDemo:
-    pass
