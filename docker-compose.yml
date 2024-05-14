@@ -4,8 +4,6 @@ services:
   db:
     image: postgres:13.2-alpine
     restart: always
-    volumes:
-      - ./data/db:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=bloggy_db
       - POSTGRES_USER=postgres
@@ -20,11 +18,18 @@ services:
 
   broker:
     image: rabbitmq:3.8-management-alpine
-    volumes:
-      - ./data/broker:/var/lib/rabbitmq
     environment:
       - RABBITMQ_DEFAULT_USER=rabbitmq
       - RABBITMQ_DEFAULT_PASS=rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
+
+  elasticsearch:
+    container_name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    environment:
+      - discovery.type=single-node
+    ports:
+      - "9200:9200"
+      - "9300:9300"

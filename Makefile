@@ -27,3 +27,9 @@ crlf config:
 
 #global crlf config:
 #	git config --global core.autocrlf true
+
+commit:
+	git commit -m "$(message)"
+
+push:
+	git push origin $(origin)
