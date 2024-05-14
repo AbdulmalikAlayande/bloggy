@@ -18,3 +18,12 @@ push:
 
 add:
 	git add .
+
+index-rebuild:
+	python manage.py search_index --rebuild
+
+crlf config:
+	git config core.autocrlf true
+
+#global crlf config:
+#	git config --global core.autocrlf true

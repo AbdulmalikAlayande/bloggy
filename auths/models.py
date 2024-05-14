@@ -91,7 +91,7 @@ class Preference(AbstractCommonModel):
 
 class Blogger(User):
     bio = models.TextField(max_length=500, blank=True)
-    preferences = models.ForeignKey(verbose_name=_("Preferences"), to=Preference, on_delete=models.PROTECT)
+    preferences = models.ForeignKey(verbose_name=_("Preferences"), to=Preference, on_delete=models.PROTECT, null=True)
 
     class Meta:
         verbose_name = _("Blogger")

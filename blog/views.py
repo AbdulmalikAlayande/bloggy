@@ -213,3 +213,19 @@ class PostDocumentView(DocumentViewSet):
         OrderingFilterBackend,
         CompoundSearchFilterBackend,
     ]
+    search_fields = [
+        "title",
+        "blogger__username",
+        "blogger__email",
+        "uuid",
+        "created_at",
+    ]
+    filter_fields = {
+        "title": "title",
+        "blogger__username": "blogger__username",
+        "blogger__email": "blogger__email",
+        "uuid": "uuid",
+        "created_at": "created_at",
+    }
+    ordering_fields = ["title", "created_at"]
+    multi_match_search_fields = ["title", "blogger__username", "blogger__email", "body"]
