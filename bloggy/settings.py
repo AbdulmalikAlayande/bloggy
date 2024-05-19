@@ -21,12 +21,13 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "debug_toolbar.apps.DebugToolbarConfig",
     "django.contrib.staticfiles",
-    'allauth',
-    'allauth.account',
+    "allauth",
+    "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.facebook",
     "allauth.socialaccount.providers.twitter",
     "allauth.socialaccount.providers.twitter_oauth2",
+    "elasticsearch_dsl",
     "django_elasticsearch_dsl",
     "django_elasticsearch_dsl_drf",
     "commons.apps.CommonsConfig",
@@ -47,11 +48,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
-ELASTICSEARCH_DSL = {
-    "default": {
-        "hosts": "localhost:9200"
-    }
-}
+ELASTICSEARCH_DSL = {"default": {"hosts": "localhost:9200"}}
 ROOT_URLCONF = "bloggy.urls"
 
 TEMPLATES = [
@@ -73,9 +70,9 @@ TEMPLATES = [
 WSGI_APPLICATION = "bloggy.wsgi.application"
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
-    ...
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+    ...,
 ]
 
 # Database
@@ -141,16 +138,8 @@ ANYMAIL = {
 }
 
 SOCIALACCOUNT_PROVIDERS = {
-    'facebook': {
-        'APP': {
-            'client_id': '',
-            'secret': '',
-            'key': ''
-        }
-    },
-    'twitter': {
-
-    }
+    "facebook": {"APP": {"client_id": "", "secret": "", "key": ""}},
+    "twitter": {},
 }
 
 # Logging #
@@ -179,7 +168,9 @@ SOCIALACCOUNT_PROVIDERS = {
 
 #  JWT
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=ENV.int("ACCESS_TOKEN_LIFETIME", default=4320)),
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        minutes=ENV.int("ACCESS_TOKEN_LIFETIME", default=4320)
+    ),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=ENV.int("REFRESH_TOKEN_LIFETIME")),
     "ROTATE_REFRESH_TOKENS": ENV.bool("ROTATE_REFRESH_TOKENS"),
     "BLACKLIST_AFTER_ROTATION": ENV.bool("BLACKLIST_AFTER_ROTATION"),

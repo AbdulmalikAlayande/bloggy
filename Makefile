@@ -32,4 +32,4 @@ commit:
 	git commit -m "$(message)"
 
 push:
-	git push origin $(origin)
+	git push origin $(branch)
